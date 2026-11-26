@@ -5,6 +5,7 @@
    ===================================================================== */
 const KEY = "sakura_db_v1";
 const fresh = () => ({
+  _seedVersion: window.SAKURA_DB_SEED ? window.SAKURA_DB_SEED._seedVersion : null,
   seq: {},
   users: [],
   settings: {},
@@ -16,7 +17,28 @@ const fresh = () => ({
   tx: [],
   uid: null,
 });
-let db = JSON.parse(localStorage.getItem(KEY) || "null") || fresh();
+const stored = JSON.parse(localStorage.getItem(KEY) || "null");
+const seed = window.SAKURA_DB_SEED;
+const hasBusinessData = (data) =>
+  ["materials", "products", "customers", "orders", "tx"].some(
+    (key) => Array.isArray(data[key]) && data[key].length > 0,
+  );
+const useSeed =
+  seed &&
+  (!stored ||
+    (!hasBusinessData(stored) && stored._seedVersion !== seed._seedVersion));
+let db = useSeed
+  ? {
+      ...seed,
+      users:
+        stored && Array.isArray(stored.users) && stored.users.length
+          ? stored.users
+          : seed.users,
+      uid: stored && stored.uid !== undefined ? stored.uid : seed.uid,
+      settings: { ...seed.settings, ...(stored && stored.settings) },
+    }
+  : stored || seed || fresh();
+if (useSeed) localStorage.setItem(KEY, JSON.stringify(db));
 const save = () => localStorage.setItem(KEY, JSON.stringify(db));
 const nid = (k) => (db.seq[k] = (db.seq[k] || 0) + 1);
 const money = (n) => Math.round((n + Number.EPSILON) * 100) / 100;
@@ -1599,7 +1621,7 @@ H({
         "Erase ALL data stored in this browser (products, orders, payments, accounts)?",
       )
     ) {
-      localStorage.removeItem(KEY);
+      localStorage.setItem(KEY, JSON.stringify(fresh()));
       location.reload();
     }
   },

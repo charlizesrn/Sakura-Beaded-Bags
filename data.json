@@ -1,0 +1,232 @@
+{
+  "_seedVersion": 1,
+  "seq": {
+    "material": 9,
+    "product": 5,
+    "customer": 3,
+    "order": 3,
+    "item": 3,
+    "tx": 2,
+    "log": 5
+  },
+  "users": [],
+  "settings": {
+    "dp_percent": 50,
+    "methods": ["GCash"]
+  },
+  "categories": ["Pearl Bag", "Sling", "Hand Bag"],
+  "materials": [
+    { "id": 1, "name": "White Beads", "unit": "packs", "stock_in": 64, "used": 0.25, "threshold": 10 },
+    { "id": 2, "name": "Brown Beads", "unit": "packs", "stock_in": 72, "used": 0, "threshold": 10 },
+    { "id": 3, "name": "Pink Beads", "unit": "packs", "stock_in": 58, "used": 0, "threshold": 10 },
+    { "id": 4, "name": "Pearl Beads", "unit": "packs", "stock_in": 91, "used": 0, "threshold": 10 },
+    { "id": 5, "name": "Red Beads", "unit": "packs", "stock_in": 83, "used": 2, "threshold": 10 },
+    { "id": 6, "name": "Yellow Beads", "unit": "packs", "stock_in": 67, "used": 0.5, "threshold": 10 },
+    { "id": 7, "name": "Plain Black", "unit": "packs", "stock_in": 56, "used": 0, "threshold": 10 },
+    { "id": 8, "name": "Beige Beads", "unit": "packs", "stock_in": 74, "used": 0, "threshold": 10 },
+    { "id": 9, "name": "Nylon", "unit": "packs", "stock_in": 100, "used": 0.75, "threshold": 10 }
+  ],
+  "log": [
+    { "id": 5, "ts": "2026-11-24T11:00:00.000Z", "material_id": 1, "material": "White Beads", "action": "Stock Out", "net": -0.25, "prev": 64, "res": 63.75, "reason": "Production started for ORD-003" },
+    { "id": 4, "ts": "2026-11-24T11:00:00.000Z", "material_id": 9, "material": "Nylon", "action": "Stock Out", "net": -0.25, "prev": 99.5, "res": 99.25, "reason": "Production started for ORD-003" },
+    { "id": 3, "ts": "2026-11-24T11:00:00.000Z", "material_id": 6, "material": "Yellow Beads", "action": "Stock Out", "net": -0.5, "prev": 67, "res": 66.5, "reason": "Production started for ORD-003" },
+    { "id": 2, "ts": "2026-11-22T10:00:00.000Z", "material_id": 9, "material": "Nylon", "action": "Stock Out", "net": -0.5, "prev": 100, "res": 99.5, "reason": "Production started for ORD-002" },
+    { "id": 1, "ts": "2026-11-22T10:00:00.000Z", "material_id": 5, "material": "Red Beads", "action": "Stock Out", "net": -2, "prev": 83, "res": 81, "reason": "Production started for ORD-002" }
+  ],
+  "products": [
+    {
+      "id": 1,
+      "name": "Pearl Bag",
+      "category": "Pearl Bag",
+      "image": "",
+      "labor": 300,
+      "packaging": 50,
+      "misc": 25,
+      "method": "markup",
+      "markup": 40,
+      "target": 0,
+      "bom": [
+        { "material_id": 4, "qty": 1, "unit_cost": 180 },
+        { "material_id": 9, "qty": 0.25, "unit_cost": 80 }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Heart Bag",
+      "category": "Sling",
+      "image": "",
+      "labor": 300,
+      "packaging": 50,
+      "misc": 25,
+      "method": "markup",
+      "markup": 40,
+      "target": 0,
+      "bom": [
+        { "material_id": 5, "qty": 1, "unit_cost": 130 },
+        { "material_id": 9, "qty": 0.25, "unit_cost": 80 }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Orange Bag",
+      "category": "Sling",
+      "image": "",
+      "labor": 300,
+      "packaging": 50,
+      "misc": 25,
+      "method": "markup",
+      "markup": 40,
+      "target": 0,
+      "bom": [
+        { "material_id": 6, "qty": 0.5, "unit_cost": 115 },
+        { "material_id": 9, "qty": 0.25, "unit_cost": 80 },
+        { "material_id": 1, "qty": 0.25, "unit_cost": 120 }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Giselle Bag",
+      "category": "Hand Bag",
+      "image": "",
+      "labor": 300,
+      "packaging": 50,
+      "misc": 25,
+      "method": "markup",
+      "markup": 40,
+      "target": 0,
+      "bom": [
+        { "material_id": 7, "qty": 1, "unit_cost": 110 },
+        { "material_id": 9, "qty": 0.25, "unit_cost": 80 }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Alexa Bag",
+      "category": "Hand Bag",
+      "image": "",
+      "labor": 300,
+      "packaging": 50,
+      "misc": 25,
+      "method": "markup",
+      "markup": 40,
+      "target": 0,
+      "bom": [
+        { "material_id": 8, "qty": 1, "unit_cost": 120 },
+        { "material_id": 9, "qty": 0.25, "unit_cost": 80 }
+      ]
+    }
+  ],
+  "customers": [
+    { "id": 1, "name": "Sample Customer One", "address": "Quezon City", "contact": "09170000001" },
+    { "id": 2, "name": "Sample Customer Two", "address": "Makati City", "contact": "09170000002" },
+    { "id": 3, "name": "Sample Customer Three", "address": "Pasig City", "contact": "09170000003" }
+  ],
+  "orders": [
+    {
+      "id": 1,
+      "created": "2026-11-20T09:00:00.000Z",
+      "customer_id": 1,
+      "total": 805,
+      "production": "Pending",
+      "delivery": "Pending",
+      "payment": "Pending",
+      "deducted": 0,
+      "cancelled": 0,
+      "refund": 0,
+      "items": [
+        {
+          "id": 1,
+          "product_id": 1,
+          "name": "Pearl Bag",
+          "qty": 1,
+          "price": 805,
+          "mat_cost": 200,
+          "labor_cost": 300,
+          "other_cost": 75,
+          "bom": [
+            { "material_id": 4, "name": "Pearl Beads", "qty": 1, "unit_cost": 180 },
+            { "material_id": 9, "name": "Nylon", "qty": 0.25, "unit_cost": 80 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "created": "2026-11-22T10:00:00.000Z",
+      "customer_id": 2,
+      "total": 1470,
+      "production": "In Progress",
+      "delivery": "Pending",
+      "payment": "Downpayment",
+      "deducted": 1,
+      "cancelled": 0,
+      "refund": 0,
+      "items": [
+        {
+          "id": 2,
+          "product_id": 2,
+          "name": "Heart Bag",
+          "qty": 2,
+          "price": 735,
+          "mat_cost": 150,
+          "labor_cost": 300,
+          "other_cost": 75,
+          "bom": [
+            { "material_id": 5, "name": "Red Beads", "qty": 1, "unit_cost": 130 },
+            { "material_id": 9, "name": "Nylon", "qty": 0.25, "unit_cost": 80 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "created": "2026-11-24T11:00:00.000Z",
+      "customer_id": 3,
+      "total": 675.5,
+      "production": "Completed",
+      "delivery": "Pending",
+      "payment": "Fully Paid",
+      "deducted": 1,
+      "cancelled": 0,
+      "refund": 0,
+      "items": [
+        {
+          "id": 3,
+          "product_id": 3,
+          "name": "Orange Bag",
+          "qty": 1,
+          "price": 675.5,
+          "mat_cost": 107.5,
+          "labor_cost": 300,
+          "other_cost": 75,
+          "bom": [
+            { "material_id": 6, "name": "Yellow Beads", "qty": 0.5, "unit_cost": 115 },
+            { "material_id": 9, "name": "Nylon", "qty": 0.25, "unit_cost": 80 },
+            { "material_id": 1, "name": "White Beads", "qty": 0.25, "unit_cost": 120 }
+          ]
+        }
+      ]
+    }
+  ],
+  "tx": [
+    {
+      "id": 1,
+      "slip_id": 2,
+      "type": "Downpayment",
+      "amount": 500,
+      "method": "GCash",
+      "ref": "2026112201",
+      "ts": "2026-11-22T10:30:00.000Z"
+    },
+    {
+      "id": 2,
+      "slip_id": 3,
+      "type": "Full Payment",
+      "amount": 675.5,
+      "method": "GCash",
+      "ref": "2026112401",
+      "ts": "2026-11-24T11:30:00.000Z"
+    }
+  ],
+  "uid": null
+}
