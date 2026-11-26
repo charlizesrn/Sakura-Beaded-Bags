@@ -115,16 +115,16 @@ function stock(m, col, delta, action, reason) {
 
 /* ---- products ---- */
 function calc(matC, labor, other, method, markup, target) {
-  const cost = matC + labor + other;
+  const cost = money(matC + labor + other);
   let sell, profit, pct;
   if (method === "target") {
-    sell = +target;
-    profit = sell - cost;
+    sell = money(+target);
+    profit = money(sell - cost);
     pct = cost ? (profit / cost) * 100 : 0;
   } else {
     pct = +markup;
-    profit = (cost * pct) / 100;
-    sell = cost + profit;
+    profit = money((cost * pct) / 100);
+    sell = money(cost + profit);
   }
   return {
     materialCost: money(matC),
@@ -611,6 +611,7 @@ on("PUT", /^\/api\/orders\/(\d+)\/items\/(\d+)\/bom$/, (b, q, id, iid) => {
   if (o.deducted) throw bad("BOM is locked because production has started");
   const it = o.items.find((x) => x.id == iid),
     lines = b.lines || [];
+  if (!lines.length) throw bad("The BOM must contain at least one material");
   for (const l of lines)
     if (!(+l.qty > 0) || !(+l.unit_cost >= 0))
       throw bad("Each line needs a quantity and unit cost");
@@ -621,6 +622,19 @@ on("PUT", /^\/api\/orders\/(\d+)\/items\/(\d+)\/bom$/, (b, q, id, iid) => {
     unit_cost: +l.unit_cost,
   }));
   it.mat_cost = money(it.bom.reduce((s, l) => s + l.qty * l.unit_cost, 0));
+  const product = db.products.find((p) => p.id == it.product_id);
+  if (product) {
+    const unitCost = money(it.mat_cost + it.labor_cost + it.other_cost);
+    if (product.method === "target") {
+      it.price = money(+product.target);
+    } else {
+      it.price = money(unitCost * (1 + (+product.markup || 0) / 100));
+    }
+  }
+  o.total = money(
+    o.items.reduce((sum, item) => sum + item.price * item.qty, 0),
+  );
+  syncPayment(o);
   return orderView(o);
 });
 on("POST", /^\/api\/orders\/(\d+)\/cancel$/, (b, q, id) => {
@@ -1002,16 +1016,16 @@ V.dashboard = async () => {
 
 /* ---------------- PRODUCTS ---------------- */
 const calcP = (mat, labor, other, m, mk, tg) => {
-  const cost = mat + labor + other;
+  const cost = money(mat + labor + other);
   let sell, profit, pct;
   if (m === "target") {
-    sell = tg;
-    profit = sell - cost;
+    sell = money(tg);
+    profit = money(sell - cost);
     pct = cost ? (profit / cost) * 100 : 0;
   } else {
     pct = mk;
-    profit = (cost * pct) / 100;
-    sell = cost + profit;
+    profit = money((cost * pct) / 100);
+    sell = money(cost + profit);
   }
   return { cost, profit, pct, sell };
 };
@@ -1064,7 +1078,7 @@ function renderBom() {
 }
 function recalc() {
   if (!$("#sum")) return;
-  const mat = P.bom.reduce((s, b) => s + b.qty * b.unit_cost, 0),
+  const mat = money(P.bom.reduce((s, b) => s + b.qty * b.unit_cost, 0)),
     labor = num("pl"),
     packaging = num("pk"),
     miscellaneous = num("pm"),
