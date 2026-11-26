@@ -558,6 +558,11 @@ on("POST", /^\/api\/orders$/, (b) => {
       mat_cost: v.materialCost,
       labor_cost: p.labor,
       other_cost: v.other,
+      packaging_cost: p.packaging,
+      misc_cost: p.misc,
+      pricing_method: p.method,
+      markup_pct: p.markup,
+      target_price: p.target,
       bom: v.bom.map((x) => ({
         material_id: x.material_id,
         name: x.name,
@@ -623,13 +628,14 @@ on("PUT", /^\/api\/orders\/(\d+)\/items\/(\d+)\/bom$/, (b, q, id, iid) => {
   }));
   it.mat_cost = money(it.bom.reduce((s, l) => s + l.qty * l.unit_cost, 0));
   const product = db.products.find((p) => p.id == it.product_id);
-  if (product) {
-    const unitCost = money(it.mat_cost + it.labor_cost + it.other_cost);
-    if (product.method === "target") {
-      it.price = money(+product.target);
-    } else {
-      it.price = money(unitCost * (1 + (+product.markup || 0) / 100));
-    }
+  const method = it.pricing_method || (product && product.method),
+    markup = it.markup_pct ?? (product && product.markup),
+    target = it.target_price ?? (product && product.target),
+    unitCost = money(it.mat_cost + it.labor_cost + it.other_cost);
+  if (method === "target") {
+    it.price = money(+target);
+  } else if (method === "markup") {
+    it.price = money(unitCost * (1 + (+markup || 0) / 100));
   }
   o.total = money(
     o.items.reduce((sum, item) => sum + item.price * item.qty, 0),
@@ -1383,7 +1389,22 @@ H({
     const o = await api("/api/orders/" + id);
     modal(`<h2 class="center">Order Entry</h2><div class="panel"><div class="between"><h3>${o.code}</h3><span class="muted">${dt(o.created)}</span></div><dl><dt>Order (Production) Status<dd>${o.cancelled ? badge("Cancelled") : badge(o.production)}<dt>Delivery Status<dd>${badge(o.delivery)}<dt>Payment Status<dd>${badge(o.payment)}<dt>Total Amount<dd>${peso(o.total)}</dl></div>
     <div class="panel"><h3>Customer Information</h3><dl><dt>Customer ID<dd>${o.customer.code}<dt>Customer Name<dd>${esc(o.customer.name)}<dt>Phone #<dd>${esc(o.customer.contact)}<dt>Shipping Address<dd>${esc(o.customer.address)}</dl></div>
-    <div class="panel"><h3>Products Ordered</h3><table><thead><tr><th>Product<th>Qty<th>Unit Selling Price<th>Unit Cost<th></tr></thead><tbody>${o.items.map((i) => `<tr><td>${esc(i.name)}<td>${i.qty}<td>${peso(i.price)}<td>${peso(i.mat_cost + i.labor_cost + i.other_cost)}<td><button class="btn sm" onclick="viewBom(${o.id},${i.id})">View BOM</button>`).join("")}</tbody></table></div>
+    <div class="panel"><h3>Products Ordered</h3><p class="muted">Each item total is its unit selling price multiplied by quantity. Unit cost and profit are shown to explain the selling price.</p>${o.items.map((i) => {
+      const unitCost = money(i.mat_cost + i.labor_cost + i.other_cost),
+        materialTotal = money(i.mat_cost),
+        profit = money(i.price - unitCost),
+        lineTotal = money(i.price * i.qty),
+        hasCostSplit =
+          Object.prototype.hasOwnProperty.call(i, "packaging_cost") &&
+          Object.prototype.hasOwnProperty.call(i, "misc_cost"),
+        otherRows = hasCostSplit
+          ? `<tr><td>Packaging<td>-<td>${peso(i.packaging_cost)}<td>${i.qty}<td>${peso(i.packaging_cost * i.qty)}</tr><tr><td>Miscellaneous<td>-<td>${peso(i.misc_cost)}<td>${i.qty}<td>${peso(i.misc_cost * i.qty)}</tr>`
+          : `<tr><td>Other costs (packaging &amp; miscellaneous)<td>-<td>${peso(i.other_cost)}<td>${i.qty}<td>${peso(i.other_cost * i.qty)}</tr>`;
+      return `<div class="panel"><div class="between"><h4>${esc(i.name)} × ${i.qty}</h4><button class="btn sm" onclick="viewBom(${o.id},${i.id})">View BOM</button></div><table><thead><tr><th>Cost / price component<th>Details<th>Per unit<th>Qty<th>Line amount</tr></thead><tbody>${(i.bom || []).map((b) => {
+        const material = money(b.qty * b.unit_cost);
+        return `<tr><td>Material: ${esc(b.name)}<td>${b.qty} × ${peso(b.unit_cost)}<td>${peso(material)}<td>${i.qty}<td>${peso(material * i.qty)}</tr>`;
+      }).join("")}<tr><th colspan="2">Materials subtotal<th>${peso(materialTotal)}<th>${i.qty}<th>${peso(materialTotal * i.qty)}</tr><tr><td>Labor<td>Labor expense<td>${peso(i.labor_cost)}<td>${i.qty}<td>${peso(i.labor_cost * i.qty)}</tr>${otherRows}<tr><th colspan="2">Total unit cost<th>${peso(unitCost)}<th>${i.qty}<th>${peso(unitCost * i.qty)}</tr><tr><td>Profit<td>Selling price less unit cost<td>${peso(profit)}<td>${i.qty}<td>${peso(profit * i.qty)}</tr><tr><th colspan="2">Unit selling price<th>${peso(i.price)}<th>${i.qty}<th>${peso(lineTotal)}</tr></tbody></table></div>`;
+    }).join("")}<div class="between"><b>Order total (sum of item line amounts)</b><b>${peso(money(o.items.reduce((sum, i) => sum + i.price * i.qty, 0)))}</b></div></div>
     <div class="panel"><h3>Payment Information</h3><dl><dt>Total Amount<dd>${peso(o.total)}<dt>Amount Paid<dd>${peso(o.paid)}<dt>Remaining Balance<dd>${peso(o.balance)}${o.cancelled ? `<dt>Refunded<dd>${peso(o.refund)}` : ""}</dl></div>
     <div class="btns"><button class="btn ghost" onclick="closeModal()">Close</button>${o.cancelled ? "" : `<button class="btn danger" onclick="cancelOrder(${o.id})">Cancel Order</button>`}</div>`);
   },
